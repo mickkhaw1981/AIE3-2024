@@ -36,6 +36,7 @@ class TextFileLoader:
         return self.documents
 
 
+
 class CharacterTextSplitter:
     def __init__(
         self,
