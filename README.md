@@ -14,3 +14,5 @@ Goal: Learn prompt engineering
 Goal: Learn RAG
 
 - lorem
+
+https://github.com/AI-Maker-Space/AI-Engineering-3
