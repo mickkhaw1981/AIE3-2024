@@ -1,6 +1,6 @@
 Mike's repo
 
-# 🧑‍💻 Week 1
+# Week 1
 
 Goal: Learn prompt engineering
 
@@ -9,7 +9,7 @@ Goal: Learn prompt engineering
 - LLM stack
 - LLM application deployment
 
-# 🏆 Week 2
+# Week 2
 
 Goal: Learn RAG
 
