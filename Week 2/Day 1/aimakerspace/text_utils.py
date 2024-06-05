@@ -1,39 +1,63 @@
 import os
 from typing import List
+import fitz  # PyMuPDF
 
+"""
+To augment the TextFileLoader class to support PDFs in addition to .txt files, we can use the PyMuPDF library (fitz module) to handle PDF files. This will allow us to read the text content from PDF files and include them in the self.documents list along with .txt files.
+
+Here are the changes to the TextFileLoader class:
+
+Modify the __init__ method to accept a list of file paths.
+Add a method to handle PDF files.
+Adjust the load and load_file methods to handle multiple file types.
+Update the load_documents method to iterate over a list of paths.
+
+"""
 
 class TextFileLoader:
-    def __init__(self, path: str, encoding: str = "utf-8"):
+    def __init__(self, *paths: str, encoding: str = "utf-8"):
         self.documents = []
-        self.path = path
+        self.paths = paths
         self.encoding = encoding
 
     def load(self):
-        if os.path.isdir(self.path):
-            self.load_directory()
-        elif os.path.isfile(self.path) and self.path.endswith(".txt"):
-            self.load_file()
-        else:
-            raise ValueError(
-                "Provided path is neither a valid directory nor a .txt file."
-            )
+        for path in self.paths:
+            if os.path.isdir(path):
+                self.load_directory(path)
+            elif os.path.isfile(path):
+                if path.endswith(".txt"):
+                    self.load_text_file(path)
+                elif path.endswith(".pdf"):
+                    self.load_pdf_file(path)
+                else:
+                    raise ValueError(f"Unsupported file type: {path}")
+            else:
+                raise ValueError(f"Provided path is neither a valid directory nor a supported file: {path}")
 
-    def load_file(self):
-        with open(self.path, "r", encoding=self.encoding) as f:
+    def load_text_file(self, path: str):
+        with open(path, "r", encoding=self.encoding) as f:
             self.documents.append(f.read())
 
-    def load_directory(self):
-        for root, _, files in os.walk(self.path):
+    def load_pdf_file(self, path: str):
+        with fitz.open(path) as doc:
+            text = ""
+            for page in doc:
+                text += page.get_text()
+            self.documents.append(text)
+
+    def load_directory(self, path: str):
+        for root, _, files in os.walk(path):
             for file in files:
+                file_path = os.path.join(root, file)
                 if file.endswith(".txt"):
-                    with open(
-                        os.path.join(root, file), "r", encoding=self.encoding
-                    ) as f:
-                        self.documents.append(f.read())
+                    self.load_text_file(file_path)
+                elif file.endswith(".pdf"):
+                    self.load_pdf_file(file_path)
 
     def load_documents(self):
         self.load()
         return self.documents
+
 
 
 
@@ -64,7 +88,7 @@ class CharacterTextSplitter:
 
 
 if __name__ == "__main__":
-    loader = TextFileLoader("data/KingLear.txt")
+    loader = TextFileLoader("data/PMarcaBlogs.txt", "data/BHorowitz_Good_PM.pdf")
     loader.load()
     splitter = CharacterTextSplitter()
     chunks = splitter.split_texts(loader.documents)
